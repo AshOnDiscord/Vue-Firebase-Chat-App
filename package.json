@@ -1,0 +1,22 @@
+{
+  "name": "googleauth",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "publish": "npm run build && surge dist ashondiscord-firebase-vue-chat.surge.sh"
+  },
+  "dependencies": {
+    "firebase": "^9.8.4",
+    "vue": "^3.2.37"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.3.3",
+    "autoprefixer": "^10.4.7",
+    "cssnano": "^5.1.12",
+    "postcss": "^8.4.14",
+    "tailwindcss": "^3.1.5",
+    "vite": "^2.9.12"
+  }
+}
