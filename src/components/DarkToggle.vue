@@ -1,5 +1,9 @@
 <template>
-  <button @click="toggle()" class="text-slate-500 dark:text-slate-400">
+  <button
+    @click="toggle()"
+    class="text-slate-500 dark:text-slate-400"
+    aria-hidden="true"
+  >
     <svg
       v-if="darkMode == 'false'"
       xmlns="http://www.w3.org/2000/svg"

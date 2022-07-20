@@ -21,7 +21,7 @@ import DarkToggle from "./DarkToggle.vue";
         Sign in with Google
       </button>
     </div>
-    <DarkToggle />
+    <DarkToggle class="absolute top-0 right-0 m-4" />
   </main>
 </template>
 

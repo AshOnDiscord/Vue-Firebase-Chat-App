@@ -42,8 +42,14 @@ import UpRightArrowVue from "../assets/Up-right-arrow.vue";
           'rounded-tl-none': !isEditing,
         }"
       >
-        <p v-if="!isEditing">
-          {{ message.data().message }}
+        <p v-if="!isEditing && !isOnlyImages()">
+          <span v-for="(snippet, index) in message.data().message.split(' ')">
+            <span v-if="!isLink(snippet)">{{ snippet }}</span>
+            <a v-else :href="snippet" class="underline">{{ snippet }}</a>
+            {{
+              index != message.data().message.split(" ").length - 1 ? " " : ""
+            }}
+          </span>
           <span
             class="text-xs text-slate-500 dark:text-slate-300"
             v-if="message.data().edited"
@@ -53,14 +59,32 @@ import UpRightArrowVue from "../assets/Up-right-arrow.vue";
         <!-- Edit Message -->
         <p
           ref="newText"
-          v-else
+          v-if="isEditing"
           v-on:keypress.enter.prevent="submitEdit()"
           v-on:keyup.escape="cancelEdit()"
           contenteditable="true"
         >
           {{ message.data().message }}
         </p>
+        <div v-if="!isEditing && isOnlyImages()">
+          <img
+            class="rounded-md"
+            :class="{ 'rounded-tl-none': index == 0, 'mt-2': index != 0 }"
+            v-for="(img, index) in images()"
+            :src="img"
+            alt=""
+          />
+        </div>
+        <div v-if="!isEditing && !isOnlyImages() && containsImages()">
+          <img
+            class="rounded-md mt-2"
+            v-for="img in images()"
+            :src="img"
+            alt=""
+          />
+        </div>
       </div>
+
       <!-- Extra Stuff -->
       <button
         class="relative DROPDOWN-MENU-TOGGLE"
@@ -111,6 +135,41 @@ export default {
     index: Number,
   },
   methods: {
+    isLink(snippet) {
+      if (snippet.startsWith("https://") || snippet.startsWith("http://")) {
+        return true;
+      }
+
+      return false;
+    },
+    isOnlyImages() {
+      const message = this.message.data().message;
+      const messageArr = message.split(" ");
+      for (let i = 0; i < messageArr.length; i++) {
+        if (!this.isImage(messageArr[i])) return false;
+      }
+      return true;
+    },
+    containsImages() {
+      const message = this.message.data().message;
+      const messageArr = message.split(" ");
+      for (let i = 0; i < messageArr.length; i++) {
+        if (this.isImage(messageArr[i])) return true;
+      }
+      return false;
+    },
+    images() {
+      const message = this.message.data().message;
+      const messageArr = message.split(" ");
+      const imageArr = [];
+      for (let i = 0; i < messageArr.length; i++) {
+        if (this.isImage(messageArr[i])) imageArr.push(messageArr[i]);
+      }
+      return imageArr;
+    },
+    isImage(url) {
+      return /^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);
+    },
     formattedDate() {
       const date = new Date(this.message.data().time);
       const options = {
@@ -151,7 +210,7 @@ export default {
     },
     submitEdit() {
       console.log(this.$refs.newText.innerText);
-      const newEdit = this.$refs.newText.innerText;
+      const newEdit = this.$refs.newText.innerText.trim();
       this.$emit("edit", newEdit);
       this.isEditing = false;
       this.$emit("isEditing", false);

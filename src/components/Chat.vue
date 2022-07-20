@@ -32,6 +32,7 @@ import Sidebar from "./Sidebar.vue";
           class="grid grid-cols-[2rem,auto] w-full px-4"
         >
           <img
+            referrerpolicy="no-referrer"
             v-if="checkIfPfp(index)"
             class="rounded-full"
             :src="JSON.parse(message.data().user).photoURL"
@@ -82,8 +83,9 @@ import Sidebar from "./Sidebar.vue";
       <input
         class="py-2 px-3 rounded-l-md w-full outline-none border border-solid border-slate-300 dark:bg-slate-800 dark:border-slate-700"
         type="text"
-        v-model="newMessage"
         placeholder="Send a message"
+        :value="newMess"
+        @input="(event) => (newMess = event.target.value)"
       />
       <button
         class="py-2 px-3 rounded-r-md bg-indigo-500 active:bg-indigo-600 text-slate-200 active:text-slate-300 border border-l-0 border-solid border-slate-300 dark:border-slate-700"
@@ -101,13 +103,19 @@ import Sidebar from "./Sidebar.vue";
 
       <ul class="flex flex-col items-start gap-2">
         <li v-for="user in onlineUsers" class="flex gap-2 items-center">
-          <img :src="user.data().pfp" class="h-8 w-8 rounded-full" alt="" />
+          <img
+            referrerpolicy="no-referrer"
+            :src="user.data().pfp"
+            class="h-8 w-8 rounded-full"
+            alt=""
+          />
           <p class="whitespace-nowrap">
             {{ user.data().username }}
           </p>
         </li>
         <li v-for="user in offlineUsers" class="flex gap-2 items-center">
           <img
+            referrerpolicy="no-referrer"
             :src="user.data().pfp"
             class="h-8 w-8 rounded-full brightness-75 contrast-75"
             alt=""
@@ -137,8 +145,8 @@ import {
 export default {
   data() {
     return {
+      newMess: "",
       messages: [],
-      newMessage: "",
       selectedMessage: null,
       users: [],
       offlineUsers: [],
@@ -207,11 +215,11 @@ export default {
       return 0;
     },
     sendMessage() {
-      const newMessage = this.newMessage.trim();
+      const newMessage = this.newMess.trim();
       if (!newMessage) return;
       const newReply = this.selectedMessage;
       this.selectedMessage = null;
-      this.newMessage = "";
+      this.newMess = "";
       addDoc(collection(this.db, "messages", "public", this.selectedChannel), {
         user: JSON.stringify(this.user),
         message: newMessage,
@@ -224,9 +232,6 @@ export default {
       await deleteDoc(
         doc(this.db, "messages", "public", this.selectedChannel, docDetails.id)
       );
-    },
-    isImage(url) {
-      return /^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);
     },
     imagify(text) {
       const textArr = text.split(" ");
@@ -287,7 +292,9 @@ export default {
       }
     },
     editMessage(newMessage, message) {
-      if (!newMessage || !message) return;
+      if (!newMessage || !message) {
+        return;
+      }
       setDoc(
         doc(this.db, "messages", "public", this.selectedChannel, message.id),
         {
