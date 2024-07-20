@@ -68,7 +68,7 @@ import UpRightArrowVue from "../assets/Up-right-arrow.vue";
         </p>
         <div v-if="!isEditing && isOnlyImages()">
           <img
-            class="rounded-md"
+            class="rounded-md max-w-80 max-h-80"
             :class="{ 'rounded-tl-none': index == 0, 'mt-2': index != 0 }"
             v-for="(img, index) in images()"
             :src="img"
@@ -77,7 +77,7 @@ import UpRightArrowVue from "../assets/Up-right-arrow.vue";
         </div>
         <div v-if="!isEditing && !isOnlyImages() && containsImages()">
           <img
-            class="rounded-md mt-2"
+            class="rounded-md mt-2 max-w-80 max-h-80"
             v-for="img in images()"
             :src="img"
             alt=""
@@ -102,7 +102,13 @@ import UpRightArrowVue from "../assets/Up-right-arrow.vue";
           >
             Edit
           </button>
-          <button class="px-2 py-1" @click="$emit('delete')">Delete</button>
+          <button
+            v-if="JSON.parse(message.data().user).uid == user.uid"
+            class="px-2 py-1"
+            @click="$emit('delete')"
+          >
+            Delete
+          </button>
         </div>
       </button>
     </div>
@@ -168,16 +174,24 @@ export default {
       return imageArr;
     },
     isImage(url) {
-      return /^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);
+      return /^https?:\/\/.+(\.(jpg|jpeg|png|webp|avif|gif|svg))?$/i.test(url);
     },
     formattedDate() {
+      // if same day, show time, else show date
+      if (
+        new Date(this.message.data().time).toDateString() !==
+        new Date().toDateString()
+      ) {
+        return new Date(this.message.data().time).toLocaleDateString();
+      }
+
       const date = new Date(this.message.data().time);
       const options = {
         hour: "numeric",
         minute: "numeric",
         hour12: true,
       };
-      const time = date.toLocaleString("en-US", options);
+      const time = date.toLocaleTimeString([], options);
       return time;
     },
     findReply() {

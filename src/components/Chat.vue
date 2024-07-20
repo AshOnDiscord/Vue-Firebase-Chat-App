@@ -5,7 +5,7 @@ import Sidebar from "./Sidebar.vue";
 
 <template>
   <main
-    class="grid grid-rows-[auto,min-content] overflow-hidden h-[calc(calc(100vh-env(safe-area-inset-bottom))-env(safe-area-inset-top))] grid-cols-[[min-content,auto,max-content] dark:bg-slate-800"
+    class="grid overflow-hidden h-[calc(calc(100vh-env(safe-area-inset-bottom))-env(safe-area-inset-top))] grid-cols-[[min-content,auto,max-content] dark:bg-slate-800"
   >
     <!-- Sidebar -->
     <Sidebar
@@ -17,83 +17,90 @@ import Sidebar from "./Sidebar.vue";
       @logOut="() => $emit('logOut', 'logOut')"
     />
 
-    <!-- Messages -->
-    <section
-      class="max-w-screen flex flex-col justify-between items-start overflow-y-scroll overflow-x-hidden bg-slate-100 col-start-2 col-end-3 row-start-1 row-end-2 dark:bg-slate-900"
-      id="chat"
-    >
-      <ul
-        class="py-4 pt-[calc(1rem+env(safe-area-inset-top))] flex gap-2 flex-col items-start w-full"
+    <div class="grid grid-rows-[auto,max-content] h-screen">
+      <!-- Messages -->
+      <section
+        class="max-w-screen flex flex-col justify-between items-start overflow-y-scroll overflow-x-hidden bg-slate-100 col-start-2 col-end-3 row-start-1 row-end-2 dark:bg-slate-900"
+        id="chat"
       >
-        <li
-          :class="{ 'mt-2': checkIfPfp(index) }"
-          v-for="(message, index) in messages"
-          :id="message.id"
-          class="grid grid-cols-[2rem,auto] w-full px-4"
+        <ul
+          class="py-4 pt-[calc(1rem+env(safe-area-inset-top))] flex gap-2 flex-col items-start w-full"
         >
-          <img
-            referrerpolicy="no-referrer"
-            v-if="checkIfPfp(index)"
-            class="rounded-full"
-            :src="JSON.parse(message.data().user).photoURL"
-            alt=""
-          />
-          <Message
-            @reply="selectedMessage = index"
-            @delete="deleteMessage(message)"
-            @seeReply="selectMessage(message.data().reply)"
-            @isEditing="
-              (value) => {
-                editingMessage(value, message.id);
-              }
-            "
-            @edit="(newMessage) => editMessage(newMessage, message)"
-            :messages="messages"
-            :message="message"
-            :user="user"
-            :index="index"
-            class="col-start-2 col-end-3"
-          />
-        </li>
-      </ul>
-      <div ref="scrollIntoView" class="bg-red-500 w-screen"></div>
-    </section>
-
-    <!-- Send Messages -->
-    <form
-      class="w-full flex bg-slate-200 px-5 py-6 items-end mb-[env(safe-area-inset-bottom)] relative col-start-2 col-end-3 row-start-2 row-end-23 dark:bg-[#0c1221]"
-      @submit.prevent="sendMessage"
-      ref="sendForm"
-    >
-      <div v-if="selectedMessage" class="absolute top-0 -translate-y-full pb-4">
-        <div class="bg-slate-200 px-3 py-2 rounded-md text-sm">
-          Replying to message:
-          <span class="text-slate-500">{{
-            messages[selectedMessage].data().message
-          }}</span
-          ><button
-            type="button"
-            class="underline ml-4 text-indigo-500"
-            @click="selectedMessage = null"
+          <li
+            :class="{ 'mt-2': checkIfPfp(index) }"
+            v-for="(message, index) in messages"
+            :id="message.id"
+            class="grid grid-cols-[2rem,auto] w-full px-4"
           >
-            Cancel
-          </button>
-        </div>
-      </div>
-      <input
-        class="py-2 px-3 rounded-l-md w-full outline-none border border-solid border-slate-300 dark:bg-slate-800 dark:border-slate-700"
-        type="text"
-        placeholder="Send a message"
-        :value="newMess"
-        @input="(event) => (newMess = event.target.value)"
-      />
-      <button
-        class="py-2 px-3 rounded-r-md bg-indigo-500 active:bg-indigo-600 text-slate-200 active:text-slate-300 border border-l-0 border-solid border-slate-300 dark:border-slate-700"
-        type="submit"
+            <img
+              referrerpolicy="no-referrer"
+              v-if="checkIfPfp(index)"
+              class="rounded-full"
+              :src="JSON.parse(message.data().user).photoURL"
+              alt=""
+            />
+            <Message
+              @reply="selectedMessage = index"
+              @delete="deleteMessage(message)"
+              @seeReply="selectMessage(message.data().reply)"
+              @isEditing="
+                (value) => {
+                  editingMessage(value, message.id);
+                }
+              "
+              @edit="(newMessage) => editMessage(newMessage, message)"
+              :messages="messages"
+              :message="message"
+              :user="user"
+              :index="index"
+              class="col-start-2 col-end-3"
+            />
+          </li>
+        </ul>
+        <div ref="scrollIntoView" class="bg-red-500 w-screen"></div>
+      </section>
+
+      <!-- Send Messages -->
+      <form
+        class="w-full flex bg-slate-200 px-5 py-6 items-end mb-[env(safe-area-inset-bottom)] relative col-start-2 col-end-3 row-start-2 row-end-23 dark:bg-[#0c1221]"
+        @submit.prevent="sendMessage"
+        ref="sendForm"
       >
-        Send
-      </button>
-    </form>
+        <div
+          v-if="selectedMessage !== null"
+          class="absolute top-0 -translate-y-full"
+        >
+          <div
+            class="bg-slate-200 px-3 py-2 rounded-t-md text-sm dark:bg-[#0c1221]"
+          >
+            Replying to message:
+            <span class="text-slate-500 dark:text-slate-400">{{
+              messages[selectedMessage].data().message
+            }}</span
+            ><button
+              type="button"
+              class="underline ml-4 text-indigo-500 dark:text-indigo-300"
+              @click="selectedMessage = null"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+        <input
+          class="py-2 px-3 rounded-l-md w-full outline-none border border-solid border-slate-300 dark:bg-slate-800 dark:border-slate-700"
+          type="text"
+          placeholder="Send a message"
+          :value="newMess"
+          @input="(event) => (newMess = event.target.value)"
+        />
+        <button
+          class="py-2 px-3 rounded-r-md bg-indigo-500 active:bg-indigo-600 text-slate-200 active:text-slate-300 border border-l-0 border-solid border-slate-300 dark:border-slate-700"
+          type="submit"
+        >
+          Send
+        </button>
+      </form>
+    </div>
 
     <!-- Users List -->
     <aside

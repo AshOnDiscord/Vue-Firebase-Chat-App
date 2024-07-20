@@ -1,7 +1,6 @@
 <script setup>
 import SignIn from "./components/Sign-in.vue";
 import SignOut from "./components/Sign-out.vue";
-import Chat from "./components/Chat.vue";
 import LoggedIn from "./components/LoggedIn.vue";
 </script>
 
@@ -19,7 +18,7 @@ import LoggedIn from "./components/LoggedIn.vue";
 
 <script>
 import { initializeApp } from "firebase/app";
-import { getFirestore, setDoc, doc } from "firebase/firestore";
+import { getFirestore, doc, updateDoc, collection } from "firebase/firestore";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -27,6 +26,8 @@ import {
   signOut,
 } from "firebase/auth";
 
+// Yes, IK this is bad, I don't want to majorly rewrite this old project, I'm just trying to get it working.
+// Also I'd need to have a server in that case which is a hassle, espically if vercel doesn't end up working.
 const firebaseConfig = {
   apiKey: "AIzaSyA7QOFfxtcX5_86-pwGKyDwoV0QFNQqpJE",
   authDomain: "auth-vue-firevbase.firebaseapp.com",
@@ -47,7 +48,6 @@ export default {
   data() {
     return {
       user: null,
-      db: null,
     };
   },
   methods: {
@@ -77,9 +77,9 @@ export default {
     },
     googleSignout() {
       const user = this.user;
-      setDoc(doc(this.db, "users", user.uid), {
-        username: user.displayName,
-        pfp: this.user.photoURL,
+      console.log(user.uid);
+      const docRef = doc(db, "users", user.uid);
+      updateDoc(docRef, {
         online: false,
       });
       signOut(auth)
@@ -98,7 +98,6 @@ export default {
   },
   mounted() {
     this.user = JSON.parse(localStorage.getItem("user"));
-    this.db = db;
   },
   components: {
     SignIn,
